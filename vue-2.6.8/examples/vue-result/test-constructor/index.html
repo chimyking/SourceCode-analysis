@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+
+
+  <script>
+    function Vue(options) {
+      this.options = options
+      this._init(options)
+    }
+    Vue.options = 0
+    Vue.prototype.options = 32
+    Vue.prototype._init = function (options) {
+      let ctr = this.constructor.options
+      console.log(ctr)
+    }
+
+    let options = {
+      devtools: true,
+      errorHandler: undefined,
+      warnHandler: undefined,
+      ignoredElements: [],
+      keyCodes: {},
+    }
+    let vm = new Vue(options)
+
+  </script>
+</body>
+
+</html>
