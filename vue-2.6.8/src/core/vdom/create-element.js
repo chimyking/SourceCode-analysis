@@ -1,9 +1,15 @@
 /* @flow */
 
 import config from '../config'
-import VNode, { createEmptyVNode } from './vnode'
-import { createComponent } from './create-component'
-import { traverse } from '../observer/traverse'
+import VNode, {
+  createEmptyVNode
+} from './vnode'
+import {
+  createComponent
+} from './create-component'
+import {
+  traverse
+} from '../observer/traverse'
 
 import {
   warn,
@@ -25,14 +31,14 @@ const ALWAYS_NORMALIZE = 2
 
 // wrapper function for providing a more flexible interface
 // without getting yelled at by flow
-export function createElement (
+export function createElement(
   context: Component,
   tag: any,
   data: any,
   children: any,
   normalizationType: any,
   alwaysNormalize: boolean
-): VNode | Array<VNode> {
+): VNode | Array < VNode > {
   if (Array.isArray(data) || isPrimitive(data)) {
     normalizationType = children
     children = data
@@ -44,13 +50,13 @@ export function createElement (
   return _createElement(context, tag, data, children, normalizationType)
 }
 
-export function _createElement (
+export function _createElement(
   context: Component,
-  tag?: string | Class<Component> | Function | Object,
-  data?: VNodeData,
-  children?: any,
-  normalizationType?: number
-): VNode | Array<VNode> {
+  tag ? : string | Class < Component > | Function | Object,
+  data ? : VNodeData,
+  children ? : any,
+  normalizationType ? : number
+): VNode | Array < VNode > {
   if (isDef(data) && isDef((data: any).__ob__)) {
     // process.env.NODE_ENV !== 'production' && warn(
     //   `Avoid using observed data object as vnode data: ${JSON.stringify(data)}\n` +
@@ -84,7 +90,9 @@ export function _createElement (
     typeof children[0] === 'function'
   ) {
     data = data || {}
-    data.scopedSlots = { default: children[0] }
+    data.scopedSlots = {
+      default: children[0]
+    }
     children.length = 0
   }
   if (normalizationType === ALWAYS_NORMALIZE) {
@@ -92,15 +100,22 @@ export function _createElement (
   } else if (normalizationType === SIMPLE_NORMALIZE) {
     children = simpleNormalizeChildren(children)
   }
+
   let vnode, ns
   if (typeof tag === 'string') {
     let Ctor
     ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag)
+
+
     if (config.isReservedTag(tag)) {
       // platform built-in elements
       vnode = new VNode(
-        config.parsePlatformTagName(tag), data, children,
-        undefined, undefined, context
+        config.parsePlatformTagName(tag),
+        data,
+        children,
+        undefined,
+        undefined,
+        context
       )
     } else if ((!data || !data.pre) && isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
       // component
@@ -110,26 +125,37 @@ export function _createElement (
       // check at runtime because it may get assigned a namespace when its
       // parent normalizes children
       vnode = new VNode(
-        tag, data, children,
-        undefined, undefined, context
+        tag,
+        data,
+        children,
+        undefined,
+        undefined,
+        context
       )
     }
+
+
   } else {
     // direct component options / constructor
     vnode = createComponent(tag, data, context, children)
   }
+
   if (Array.isArray(vnode)) {
     return vnode
   } else if (isDef(vnode)) {
     if (isDef(ns)) applyNS(vnode, ns)
     if (isDef(data)) registerDeepBindings(data)
+
     return vnode
+    
   } else {
     return createEmptyVNode()
   }
+
+
 }
 
-function applyNS (vnode, ns, force) {
+function applyNS(vnode, ns, force) {
   vnode.ns = ns
   if (vnode.tag === 'foreignObject') {
     // use default namespace inside foreignObject
@@ -140,7 +166,7 @@ function applyNS (vnode, ns, force) {
     for (let i = 0, l = vnode.children.length; i < l; i++) {
       const child = vnode.children[i]
       if (isDef(child.tag) && (
-        isUndef(child.ns) || (isTrue(force) && child.tag !== 'svg'))) {
+          isUndef(child.ns) || (isTrue(force) && child.tag !== 'svg'))) {
         applyNS(child, ns, force)
       }
     }
@@ -150,7 +176,7 @@ function applyNS (vnode, ns, force) {
 // ref #5318
 // necessary to ensure parent re-render when deep bindings like :style and
 // :class are used on slot nodes
-function registerDeepBindings (data) {
+function registerDeepBindings(data) {
   if (isObject(data.style)) {
     traverse(data.style)
   }

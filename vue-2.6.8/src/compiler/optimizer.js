@@ -21,6 +21,7 @@ const genStaticKeysCached = cached(genStaticKeys)
 export function optimize (root: ?ASTElement, options: CompilerOptions) {
   if (!root) return
   isStaticKey = genStaticKeysCached(options.staticKeys || '')
+
   isPlatformReservedTag = options.isReservedTag || no
   // first pass: mark all non-static nodes.
   markStatic(root)
@@ -36,7 +37,9 @@ function genStaticKeys (keys: string): Function {
 }
 
 function markStatic (node: ASTNode) {
+  
   node.static = isStatic(node)
+
   if (node.type === 1) {
     // do not make component slot content static. this avoids
     // 1. components not able to mutate slot nodes
@@ -48,6 +51,8 @@ function markStatic (node: ASTNode) {
     ) {
       return
     }
+
+
     for (let i = 0, l = node.children.length; i < l; i++) {
       const child = node.children[i]
       markStatic(child)

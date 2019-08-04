@@ -9,9 +9,16 @@
  * http://erik.eae.net/simplehtmlparser/simplehtmlparser.js
  */
 
-import { makeMap, no } from 'shared/util'
-import { isNonPhrasingTag } from 'web/compiler/util'
-import { unicodeRegExp } from 'core/util/lang'
+import {
+  makeMap,
+  no
+} from 'shared/util'
+import {
+  isNonPhrasingTag
+} from 'web/compiler/util'
+import {
+  unicodeRegExp
+} from 'core/util/lang'
 
 // Regular Expressions for parsing tags and attributes
 const attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/
@@ -46,25 +53,47 @@ const encodedAttrWithNewLines = /&(?:lt|gt|quot|amp|#39|#10|#9);/g
 const isIgnoreNewlineTag = makeMap('pre,textarea', true)
 const shouldIgnoreFirstNewline = (tag, html) => tag && isIgnoreNewlineTag(tag) && html[0] === '\n'
 
-function decodeAttr (value, shouldDecodeNewlines) {
+function decodeAttr(value, shouldDecodeNewlines) {
   const re = shouldDecodeNewlines ? encodedAttrWithNewLines : encodedAttr
   return value.replace(re, match => decodingMap[match])
 }
 
-export function parseHTML (html, options) {
+/**
+ * 
+ * @param {*} html 
+ * @param {*} options 
+ * options:{
+ * warn,
+ * expectHTML,
+ * isUnaryTag,
+ * canBeLeftOpenTag,
+ * shouldDecodeNewlines,
+ * shouldDecodeNewlinesForHref,
+ * shouldKeepComment,
+ * outputSourceRange,
+ * start,
+ * end,
+ * chars,
+ * comment
+ * }
+ */
+export function parseHTML(html, options) {
+
   const stack = []
   const expectHTML = options.expectHTML
   const isUnaryTag = options.isUnaryTag || no
   const canBeLeftOpenTag = options.canBeLeftOpenTag || no
   let index = 0
   let last, lastTag
+
   while (html) {
     last = html
     // Make sure we're not in a plaintext content element like script/style
     if (!lastTag || !isPlainTextElement(lastTag)) {
       let textEnd = html.indexOf('<')
       if (textEnd === 0) {
-        // Comment:
+
+        // 1. Comment: 注释
         if (comment.test(html)) {
           const commentEnd = html.indexOf('-->')
 
@@ -78,6 +107,7 @@ export function parseHTML (html, options) {
         }
 
         // http://en.wikipedia.org/wiki/Conditional_comment#Downlevel-revealed_conditional_comment
+        // 2. 条件注释   以<![>结尾
         if (conditionalComment.test(html)) {
           const conditionalEnd = html.indexOf(']>')
 
@@ -87,14 +117,14 @@ export function parseHTML (html, options) {
           }
         }
 
-        // Doctype:
+        // 3. Doctype: 文档注释
         const doctypeMatch = html.match(doctype)
         if (doctypeMatch) {
           advance(doctypeMatch[0].length)
           continue
         }
 
-        // End tag:
+        // 4. End tag: 结束标签
         const endTagMatch = html.match(endTag)
         if (endTagMatch) {
           const curIndex = index
@@ -117,6 +147,7 @@ export function parseHTML (html, options) {
       let text, rest, next
       if (textEnd >= 0) {
         rest = html.slice(textEnd)
+
         while (
           !endTag.test(rest) &&
           !startTagOpen.test(rest) &&
@@ -129,6 +160,7 @@ export function parseHTML (html, options) {
           textEnd += next
           rest = html.slice(textEnd)
         }
+        
         text = html.substring(0, textEnd)
       }
 
@@ -170,27 +202,32 @@ export function parseHTML (html, options) {
     if (html === last) {
       options.chars && options.chars(html)
       if (process.env.NODE_ENV !== 'production' && !stack.length && options.warn) {
-        options.warn(`Mal-formatted tag at end of template: "${html}"`, { start: index + html.length })
+        options.warn(`Mal-formatted tag at end of template: "${html}"`, {
+          start: index + html.length
+        })
       }
       break
     }
+
+
   }
 
   // Clean up any remaining tags
   parseEndTag()
 
-  function advance (n) {
+  function advance(n) {
     index += n
     html = html.substring(n)
   }
 
-  function parseStartTag () {
+  function parseStartTag() {
     const start = html.match(startTagOpen)
     if (start) {
       const match = {
         tagName: start[1],
         attrs: [],
-        start: index
+        start: index,
+        // unarySlash:
       }
       advance(start[0].length)
       let end, attr
@@ -209,7 +246,17 @@ export function parseHTML (html, options) {
     }
   }
 
-  function handleStartTag (match) {
+  /**
+   * 
+   * @param {*} match 
+   *
+   const match = {
+     tagName: start[1],
+     attrs: [],
+     start: index
+   }
+   */
+  function handleStartTag(match) {
     const tagName = match.tagName
     const unarySlash = match.unarySlash
 
@@ -229,9 +276,9 @@ export function parseHTML (html, options) {
     for (let i = 0; i < l; i++) {
       const args = match.attrs[i]
       const value = args[3] || args[4] || args[5] || ''
-      const shouldDecodeNewlines = tagName === 'a' && args[1] === 'href'
-        ? options.shouldDecodeNewlinesForHref
-        : options.shouldDecodeNewlines
+      const shouldDecodeNewlines = tagName === 'a' && args[1] === 'href' ?
+        options.shouldDecodeNewlinesForHref :
+        options.shouldDecodeNewlines
       attrs[i] = {
         name: args[1],
         value: decodeAttr(value, shouldDecodeNewlines)
@@ -243,7 +290,13 @@ export function parseHTML (html, options) {
     }
 
     if (!unary) {
-      stack.push({ tag: tagName, lowerCasedTag: tagName.toLowerCase(), attrs: attrs, start: match.start, end: match.end })
+      stack.push({
+        tag: tagName,
+        lowerCasedTag: tagName.toLowerCase(),
+        attrs: attrs,
+        start: match.start,
+        end: match.end
+      })
       lastTag = tagName
     }
 
@@ -252,7 +305,7 @@ export function parseHTML (html, options) {
     }
   }
 
-  function parseEndTag (tagName, start, end) {
+  function parseEndTag(tagName, start, end) {
     let pos, lowerCasedTagName
     if (start == null) start = index
     if (end == null) end = index
@@ -278,8 +331,10 @@ export function parseHTML (html, options) {
           options.warn
         ) {
           options.warn(
-            `tag <${stack[i].tag}> has no matching end tag.`,
-            { start: stack[i].start, end: stack[i].end }
+            `tag <${stack[i].tag}> has no matching end tag.`, {
+              start: stack[i].start,
+              end: stack[i].end
+            }
           )
         }
         if (options.end) {

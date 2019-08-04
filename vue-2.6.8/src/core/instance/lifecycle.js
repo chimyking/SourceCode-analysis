@@ -34,7 +34,7 @@ export function initLifecycle (vm: Component) {
 
   // locate first non-abstract parent
   let parent = options.parent
-  if (parent && !options.abstract) {
+  if (parent && !options.abstract) { // transition | keep-alive
     while (parent.$options.abstract && parent.$parent) {
       parent = parent.$parent
     }

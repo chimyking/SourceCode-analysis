@@ -18,6 +18,10 @@ function createFunction (code, errors) {
   }
 }
 
+/**
+ * 
+ * @param {*} compile 
+ */
 export function createCompileToFunctionFn (compile: Function): Function {
   const cache = Object.create(null)
 

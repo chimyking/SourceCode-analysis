@@ -10,22 +10,14 @@ import {
 function transformNode (el: ASTElement, options: CompilerOptions) {
   const warn = options.warn || baseWarn
   const staticClass = getAndRemoveAttr(el, 'class')
-  if (process.env.NODE_ENV !== 'production' && staticClass) {
-    const res = parseText(staticClass, options.delimiters)
-    if (res) {
-      warn(
-        `class="${staticClass}": ` +
-        'Interpolation inside attributes has been removed. ' +
-        'Use v-bind or the colon shorthand instead. For example, ' +
-        'instead of <div class="{{ val }}">, use <div :class="val">.',
-        el.rawAttrsMap['class']
-      )
-    }
-  }
+  
   if (staticClass) {
     el.staticClass = JSON.stringify(staticClass)
   }
+
+  // 动态的class    :class || v-bind:class
   const classBinding = getBindingAttr(el, 'class', false /* getStatic */)
+  
   if (classBinding) {
     el.classBinding = classBinding
   }

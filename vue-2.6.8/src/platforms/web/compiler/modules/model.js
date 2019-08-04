@@ -34,21 +34,26 @@ function preTransformNode (el: ASTElement, options: CompilerOptions) {
     if (map[':type'] || map['v-bind:type']) {
       typeBinding = getBindingAttr(el, 'type')
     }
+    // 可以直接用v-bind ={type:'text'},
     if (!map.type && !typeBinding && map['v-bind']) {
       typeBinding = `(${map['v-bind']}).type`
     }
 
     if (typeBinding) {
+      
       const ifCondition = getAndRemoveAttr(el, 'v-if', true)
       const ifConditionExtra = ifCondition ? `&&(${ifCondition})` : ``
       const hasElse = getAndRemoveAttr(el, 'v-else', true) != null
       const elseIfCondition = getAndRemoveAttr(el, 'v-else-if', true)
+
       // 1. checkbox
       const branch0 = cloneASTElement(el)
+
       // process for on the main node
       processFor(branch0)
       addRawAttr(branch0, 'type', 'checkbox')
       processElement(branch0, options)
+
       branch0.processed = true // prevent it from double-processed
       branch0.if = `(${typeBinding})==='checkbox'` + ifConditionExtra
       addIfCondition(branch0, {
@@ -69,6 +74,7 @@ function preTransformNode (el: ASTElement, options: CompilerOptions) {
       getAndRemoveAttr(branch2, 'v-for', true)
       addRawAttr(branch2, ':type', typeBinding)
       processElement(branch2, options)
+
       addIfCondition(branch0, {
         exp: ifCondition,
         block: branch2
@@ -88,6 +94,22 @@ function preTransformNode (el: ASTElement, options: CompilerOptions) {
 function cloneASTElement (el) {
   return createASTElement(el.tag, el.attrsList.slice(), el.parent)
 }
+
+//  function createASTElement(
+//   tag: string,
+//   attrs: Array < ASTAttr > ,
+//   parent: ASTElement | void
+// ): ASTElement {
+//   return {
+//     type: 1,
+//     tag,
+//     attrsList: attrs,
+//     attrsMap: makeAttrsMap(attrs),
+//     rawAttrsMap: {},
+//     parent,
+//     children: []
+//   }
+// }
 
 export default {
   preTransformNode

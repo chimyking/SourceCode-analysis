@@ -127,4 +127,6 @@ export default ({
    * Exposed for legacy reasons
    */
   _lifecycleHooks: LIFECYCLE_HOOKS
+
+  
 }: Config)

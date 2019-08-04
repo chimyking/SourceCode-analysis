@@ -7,3 +7,19 @@ export default [
   style,
   model
 ]
+
+
+// klass: {
+//   staticKeys: ['staticClass'],
+//   transformNode,
+//   genData
+// }
+
+// style: {
+//   staticKeys: ['staticStyle'],
+//   transformNode,
+//   genData
+// }
+// model:{
+//   preTransformNode
+// }

@@ -26,15 +26,13 @@ export function initExtend (Vue: GlobalAPI) {
     }
 
     const name = extendOptions.name || Super.options.name
-    if (process.env.NODE_ENV !== 'production' && name) {
-      validateComponentName(name)
-    }
-
+    
     const Sub = function VueComponent (options) {
       this._init(options)
     }
     Sub.prototype = Object.create(Super.prototype)
     Sub.prototype.constructor = Sub
+
     Sub.cid = cid++
     Sub.options = mergeOptions(
       Super.options,
@@ -62,6 +60,7 @@ export function initExtend (Vue: GlobalAPI) {
     ASSET_TYPES.forEach(function (type) {
       Sub[type] = Super[type]
     })
+    
     // enable recursive self-lookup
     if (name) {
       Sub.options.components[name] = Sub
