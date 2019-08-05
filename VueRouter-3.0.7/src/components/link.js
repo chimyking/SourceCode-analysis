@@ -1,14 +1,32 @@
 /* @flow */
 
-import { createRoute, isSameRoute, isIncludedRoute } from '../util/route'
-import { extend } from '../util/misc'
-import { normalizeLocation } from '../util/location'
-import { warn } from '../util/warn'
+import {
+  createRoute,
+  isSameRoute,
+  isIncludedRoute
+} from '../util/route'
+import {
+  extend
+} from '../util/misc'
+import {
+  normalizeLocation
+} from '../util/location'
+import {
+  warn
+} from '../util/warn'
 
 // work around weird flow bug
-const toTypes: Array<Function> = [String, Object]
-const eventTypes: Array<Function> = [String, Array]
+const toTypes: Array < Function > = [String, Object] // string 或者 对象
+const eventTypes: Array < Function > = [String, Array]
 
+/**
+ * to:
+ * to = "home"
+ * :to = "home"
+ * :to = "{ path: 'home' }"
+ * :to = "{ name: 'user', params: { userId: 123 }}"
+ * :to = "{ path: 'register', query: { plan: 'private' }}"
+ */
 export default {
   name: 'RouterLink',
   props: {
@@ -30,43 +48,55 @@ export default {
       default: 'click'
     }
   },
-  render (h: Function) {
+  render(h: Function) {
     const router = this.$router
     const current = this.$route
-    const { location, route, href } = router.resolve(
+    const {
+      location,
+      route,
+      href
+    } = router.resolve(
       this.to,
       current,
       this.append
     )
 
     const classes = {}
+
     const globalActiveClass = router.options.linkActiveClass
+
     const globalExactActiveClass = router.options.linkExactActiveClass
+
     // Support global empty active class
     const activeClassFallback =
       globalActiveClass == null ? 'router-link-active' : globalActiveClass
+
     const exactActiveClassFallback =
-      globalExactActiveClass == null
-        ? 'router-link-exact-active'
-        : globalExactActiveClass
+      globalExactActiveClass == null ?
+      'router-link-exact-active' :
+      globalExactActiveClass
+
     const activeClass =
       this.activeClass == null ? activeClassFallback : this.activeClass
-    const exactActiveClass =
-      this.exactActiveClass == null
-        ? exactActiveClassFallback
-        : this.exactActiveClass
 
-    const compareTarget = route.redirectedFrom
-      ? createRoute(null, normalizeLocation(route.redirectedFrom), null, router)
-      : route
+    const exactActiveClass =
+      this.exactActiveClass == null ?
+      exactActiveClassFallback :
+      this.exactActiveClass
+
+    const compareTarget = route.redirectedFrom ?
+      createRoute(null, normalizeLocation(route.redirectedFrom), null, router) :
+      route
 
     classes[exactActiveClass] = isSameRoute(current, compareTarget)
-    classes[activeClass] = this.exact
-      ? classes[exactActiveClass]
-      : isIncludedRoute(current, compareTarget)
+
+    classes[activeClass] = this.exact ?
+      classes[exactActiveClass] :
+      isIncludedRoute(current, compareTarget)
 
     const handler = e => {
       if (guardEvent(e)) {
+
         if (this.replace) {
           router.replace(location)
         } else {
@@ -75,7 +105,9 @@ export default {
       }
     }
 
-    const on = { click: guardEvent }
+    const on = {
+      click: guardEvent
+    }
     if (Array.isArray(this.event)) {
       this.event.forEach(e => {
         on[e] = handler
@@ -84,10 +116,11 @@ export default {
       on[this.event] = handler
     }
 
-    const data: any = { class: classes }
+    const data: any = {
+      class: classes
+    }
 
-    const scopedSlot =
-      !this.$scopedSlots.$hasNormal &&
+    const scopedSlot = !this.$scopedSlots.$hasNormal &&
       this.$scopedSlots.default &&
       this.$scopedSlots.default({
         href,
@@ -97,6 +130,7 @@ export default {
         isExactActive: classes[exactActiveClass]
       })
 
+    // todo
     if (scopedSlot) {
       if (scopedSlot.length === 1) {
         return scopedSlot[0]
@@ -115,7 +149,9 @@ export default {
 
     if (this.tag === 'a') {
       data.on = on
-      data.attrs = { href }
+      data.attrs = {
+        href
+      }
     } else {
       // find the first <a> child and apply listener and href
       const a = findAnchor(this.$slots.default)
@@ -132,11 +168,18 @@ export default {
       }
     }
 
+    /**
+     * {
+     * tag:'',
+     * data:'',
+     * children
+     * }
+     */
     return h(this.tag, data, this.$slots.default)
   }
 }
 
-function guardEvent (e) {
+function guardEvent(e) {
   // don't redirect with control keys
   if (e.metaKey || e.altKey || e.ctrlKey || e.shiftKey) return
   // don't redirect when preventDefault called
@@ -155,7 +198,7 @@ function guardEvent (e) {
   return true
 }
 
-function findAnchor (children) {
+function findAnchor(children) {
   if (children) {
     let child
     for (let i = 0; i < children.length; i++) {

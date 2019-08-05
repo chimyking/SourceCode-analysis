@@ -3,7 +3,9 @@ import Link from './components/link'
 
 export let _Vue
 
-export function install (Vue) {
+export function install(Vue) {
+
+
   if (install.installed && _Vue === Vue) return
   install.installed = true
 
@@ -19,7 +21,7 @@ export function install (Vue) {
   }
 
   Vue.mixin({
-    beforeCreate () {
+    beforeCreate() {
       if (isDef(this.$options.router)) {
         this._routerRoot = this
         this._router = this.$options.router
@@ -30,17 +32,21 @@ export function install (Vue) {
       }
       registerInstance(this, this)
     },
-    destroyed () {
+    destroyed() {
       registerInstance(this)
     }
   })
 
   Object.defineProperty(Vue.prototype, '$router', {
-    get () { return this._routerRoot._router }
+    get() {
+      return this._routerRoot._router
+    }
   })
 
   Object.defineProperty(Vue.prototype, '$route', {
-    get () { return this._routerRoot._route }
+    get() {
+      return this._routerRoot._route
+    }
   })
 
   Vue.component('RouterView', View)

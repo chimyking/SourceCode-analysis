@@ -1,31 +1,36 @@
 /* @flow */
 
 import Regexp from 'path-to-regexp'
-import { cleanPath } from './util/path'
-import { assert, warn } from './util/warn'
+import {
+  cleanPath
+} from './util/path'
+import {
+  assert,
+  warn
+} from './util/warn'
 
-export function createRouteMap (
-  routes: Array<RouteConfig>,
-  oldPathList?: Array<string>,
-  oldPathMap?: Dictionary<RouteRecord>,
-  oldNameMap?: Dictionary<RouteRecord>
+export function createRouteMap(
+  routes: Array < RouteConfig > ,
+  oldPathList ? : Array < string > ,
+  oldPathMap ? : Dictionary < RouteRecord > ,
+  oldNameMap ? : Dictionary < RouteRecord >
 ): {
-  pathList: Array<string>,
-  pathMap: Dictionary<RouteRecord>,
-  nameMap: Dictionary<RouteRecord>
+  pathList: Array < string > ,
+  pathMap: Dictionary < RouteRecord > ,
+  nameMap: Dictionary < RouteRecord >
 } {
   // the path list is used to control path matching priority
-  const pathList: Array<string> = oldPathList || []
+  const pathList: Array < string > = oldPathList || []
   // $flow-disable-line
-  const pathMap: Dictionary<RouteRecord> = oldPathMap || Object.create(null)
+  const pathMap: Dictionary < RouteRecord > = oldPathMap || Object.create(null)
   // $flow-disable-line
-  const nameMap: Dictionary<RouteRecord> = oldNameMap || Object.create(null)
+  const nameMap: Dictionary < RouteRecord > = oldNameMap || Object.create(null)
 
   routes.forEach(route => {
     addRouteRecord(pathList, pathMap, nameMap, route)
   })
 
-  // ensure wildcard routes are always at the end
+  // ensure wildcard(未知的) routes are always at the end
   for (let i = 0, l = pathList.length; i < l; i++) {
     if (pathList[i] === '*') {
       pathList.push(pathList.splice(i, 1)[0])
@@ -41,27 +46,23 @@ export function createRouteMap (
   }
 }
 
-function addRouteRecord (
-  pathList: Array<string>,
-  pathMap: Dictionary<RouteRecord>,
-  nameMap: Dictionary<RouteRecord>,
+function addRouteRecord(
+  pathList: Array < string > ,
+  pathMap: Dictionary < RouteRecord > ,
+  nameMap: Dictionary < RouteRecord > ,
   route: RouteConfig,
-  parent?: RouteRecord,
-  matchAs?: string
+  parent ? : RouteRecord,
+  matchAs ? : string
 ) {
-  const { path, name } = route
-  if (process.env.NODE_ENV !== 'production') {
-    assert(path != null, `"path" is required in a route configuration.`)
-    assert(
-      typeof route.component !== 'string',
-      `route config "component" for path: ${String(
-        path || name
-      )} cannot be a ` + `string id. Use an actual component instead.`
-    )
-  }
+  const {
+    path,
+    name
+  } = route
 
   const pathToRegexpOptions: PathToRegexpOptions =
     route.pathToRegexpOptions || {}
+
+  // ${parent.path}/${path}
   const normalizedPath = normalizePath(path, parent, pathToRegexpOptions.strict)
 
   if (typeof route.caseSensitive === 'boolean') {
@@ -71,7 +72,9 @@ function addRouteRecord (
   const record: RouteRecord = {
     path: normalizedPath,
     regex: compileRouteRegex(normalizedPath, pathToRegexpOptions),
-    components: route.components || { default: route.component },
+    components: route.components || {
+      default: route.component
+    },
     instances: {},
     name,
     parent,
@@ -79,12 +82,10 @@ function addRouteRecord (
     redirect: route.redirect,
     beforeEnter: route.beforeEnter,
     meta: route.meta || {},
-    props:
-      route.props == null
-        ? {}
-        : route.components
-          ? route.props
-          : { default: route.props }
+    props: route.props == null ? {} : route.components ?
+      route.props : {
+        default: route.props
+      }
   }
 
   if (route.children) {
@@ -100,19 +101,19 @@ function addRouteRecord (
         warn(
           false,
           `Named Route '${route.name}' has a default child route. ` +
-            `When navigating to this named route (:to="{name: '${
+          `When navigating to this named route (:to="{name: '${
               route.name
             }'"), ` +
-            `the default child route will not be rendered. Remove the name from ` +
-            `this route and use the name of the default child route for named ` +
-            `links instead.`
+          `the default child route will not be rendered. Remove the name from ` +
+          `this route and use the name of the default child route for named ` +
+          `links instead.`
         )
       }
     }
     route.children.forEach(child => {
-      const childMatchAs = matchAs
-        ? cleanPath(`${matchAs}/${child.path}`)
-        : undefined
+      const childMatchAs = matchAs ?
+        cleanPath(`${matchAs}/${child.path}`) :
+        undefined
       addRouteRecord(pathList, pathMap, nameMap, child, record, childMatchAs)
     })
   }
@@ -157,13 +158,13 @@ function addRouteRecord (
       warn(
         false,
         `Duplicate named routes definition: ` +
-          `{ name: "${name}", path: "${record.path}" }`
+        `{ name: "${name}", path: "${record.path}" }`
       )
     }
   }
 }
 
-function compileRouteRegex (
+function compileRouteRegex(
   path: string,
   pathToRegexpOptions: PathToRegexpOptions
 ): RouteRegExp {
@@ -181,10 +182,10 @@ function compileRouteRegex (
   return regex
 }
 
-function normalizePath (
+function normalizePath(
   path: string,
-  parent?: RouteRecord,
-  strict?: boolean
+  parent ? : RouteRecord,
+  strict ? : boolean
 ): string {
   if (!strict) path = path.replace(/\/$/, '')
   if (path[0] === '/') return path

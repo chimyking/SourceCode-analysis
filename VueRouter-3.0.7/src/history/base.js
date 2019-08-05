@@ -1,37 +1,52 @@
 /* @flow */
 
-import { _Vue } from '../install'
+import {
+  _Vue
+} from '../install'
 import type Router from '../index'
-import { inBrowser } from '../util/dom'
-import { runQueue } from '../util/async'
-import { warn, isError, isExtendedError } from '../util/warn'
-import { START, isSameRoute } from '../util/route'
+import {
+  inBrowser
+} from '../util/dom'
+import {
+  runQueue
+} from '../util/async'
+import {
+  warn,
+  isError,
+  isExtendedError
+} from '../util/warn'
+import {
+  START,
+  isSameRoute
+} from '../util/route'
 import {
   flatten,
   flatMapComponents,
   resolveAsyncComponents
 } from '../util/resolve-components'
-import { NavigationDuplicated } from './errors'
+import {
+  NavigationDuplicated
+} from './errors'
 
 export class History {
   router: Router
   base: string
   current: Route
-  pending: ?Route
+  pending: ? Route
   cb: (r: Route) => void
   ready: boolean
-  readyCbs: Array<Function>
-  readyErrorCbs: Array<Function>
-  errorCbs: Array<Function>
+  readyCbs: Array < Function >
+    readyErrorCbs: Array < Function >
+    errorCbs: Array < Function >
 
-  // implemented by sub-classes
-  +go: (n: number) => void
-  +push: (loc: RawLocation) => void
-  +replace: (loc: RawLocation) => void
-  +ensureURL: (push?: boolean) => void
-  +getCurrentLocation: () => string
+    // implemented by sub-classes
+    go: (n: number) => void
+  push: (loc: RawLocation) => void
+  replace: (loc: RawLocation) => void
+  ensureURL: (push ? : boolean) => void
+  getCurrentLocation: () => string
 
-  constructor (router: Router, base: ?string) {
+  constructor(router: Router, base: ? string) {
     this.router = router
     this.base = normalizeBase(base)
     // start with a route object that stands for "nowhere"
@@ -43,11 +58,11 @@ export class History {
     this.errorCbs = []
   }
 
-  listen (cb: Function) {
+  listen(cb: Function) {
     this.cb = cb
   }
 
-  onReady (cb: Function, errorCb: ?Function) {
+  onReady(cb: Function, errorCb: ? Function) {
     if (this.ready) {
       cb()
     } else {
@@ -58,14 +73,17 @@ export class History {
     }
   }
 
-  onError (errorCb: Function) {
+  onError(errorCb: Function) {
     this.errorCbs.push(errorCb)
   }
 
-  transitionTo (
+  /**
+   * 
+   */
+  transitionTo(
     location: RawLocation,
-    onComplete?: Function,
-    onAbort?: Function
+    onComplete ? : Function,
+    onAbort ? : Function
   ) {
     const route = this.router.match(location, this.current)
     this.confirmTransition(
@@ -97,7 +115,10 @@ export class History {
     )
   }
 
-  confirmTransition (route: Route, onComplete: Function, onAbort?: Function) {
+  /**
+   * 
+   */
+  confirmTransition(route: Route, onComplete: Function, onAbort ? : Function) {
     const current = this.current
     const abort = err => {
       // after merging https://github.com/vuejs/vue-router/pull/2771 we
@@ -125,12 +146,16 @@ export class History {
       return abort(new NavigationDuplicated(route))
     }
 
-    const { updated, deactivated, activated } = resolveQueue(
+    const {
+      updated,
+      deactivated,
+      activated
+    } = resolveQueue(
       this.current.matched,
       route.matched
     )
 
-    const queue: Array<?NavigationGuard> = [].concat(
+    const queue: Array < ? NavigationGuard > = [].concat(
       // in-component leave guards
       extractLeaveGuards(deactivated),
       // global before hooks
@@ -200,7 +225,7 @@ export class History {
     })
   }
 
-  updateRoute (route: Route) {
+  updateRoute(route: Route) {
     const prev = this.current
     this.current = route
     this.cb && this.cb(route)
@@ -210,7 +235,7 @@ export class History {
   }
 }
 
-function normalizeBase (base: ?string): string {
+function normalizeBase(base: ? string): string {
   if (!base) {
     if (inBrowser) {
       // respect <base> tag
@@ -230,13 +255,13 @@ function normalizeBase (base: ?string): string {
   return base.replace(/\/$/, '')
 }
 
-function resolveQueue (
-  current: Array<RouteRecord>,
-  next: Array<RouteRecord>
+function resolveQueue(
+  current: Array < RouteRecord > ,
+  next: Array < RouteRecord >
 ): {
-  updated: Array<RouteRecord>,
-  activated: Array<RouteRecord>,
-  deactivated: Array<RouteRecord>
+  updated: Array < RouteRecord > ,
+  activated: Array < RouteRecord > ,
+  deactivated: Array < RouteRecord >
 } {
   let i
   const max = Math.max(current.length, next.length)
@@ -252,27 +277,27 @@ function resolveQueue (
   }
 }
 
-function extractGuards (
-  records: Array<RouteRecord>,
+function extractGuards(
+  records: Array < RouteRecord > ,
   name: string,
   bind: Function,
-  reverse?: boolean
-): Array<?Function> {
+  reverse ? : boolean
+): Array < ? Function > {
   const guards = flatMapComponents(records, (def, instance, match, key) => {
     const guard = extractGuard(def, name)
     if (guard) {
-      return Array.isArray(guard)
-        ? guard.map(guard => bind(guard, instance, match, key))
-        : bind(guard, instance, match, key)
+      return Array.isArray(guard) ?
+        guard.map(guard => bind(guard, instance, match, key)) :
+        bind(guard, instance, match, key)
     }
   })
   return flatten(reverse ? guards.reverse() : guards)
 }
 
-function extractGuard (
+function extractGuard(
   def: Object | Function,
   key: string
-): NavigationGuard | Array<NavigationGuard> {
+): NavigationGuard | Array < NavigationGuard > {
   if (typeof def !== 'function') {
     // extend now so that global mixins are applied.
     def = _Vue.extend(def)
@@ -280,27 +305,27 @@ function extractGuard (
   return def.options[key]
 }
 
-function extractLeaveGuards (deactivated: Array<RouteRecord>): Array<?Function> {
+function extractLeaveGuards(deactivated: Array < RouteRecord > ): Array < ? Function > {
   return extractGuards(deactivated, 'beforeRouteLeave', bindGuard, true)
 }
 
-function extractUpdateHooks (updated: Array<RouteRecord>): Array<?Function> {
+function extractUpdateHooks(updated: Array < RouteRecord > ): Array < ? Function > {
   return extractGuards(updated, 'beforeRouteUpdate', bindGuard)
 }
 
-function bindGuard (guard: NavigationGuard, instance: ?_Vue): ?NavigationGuard {
+function bindGuard(guard: NavigationGuard, instance: ? _Vue): ? NavigationGuard {
   if (instance) {
-    return function boundRouteGuard () {
+    return function boundRouteGuard() {
       return guard.apply(instance, arguments)
     }
   }
 }
 
-function extractEnterGuards (
-  activated: Array<RouteRecord>,
-  cbs: Array<Function>,
+function extractEnterGuards(
+  activated: Array < RouteRecord > ,
+  cbs: Array < Function > ,
   isValid: () => boolean
-): Array<?Function> {
+) : Array < ? Function > {
   return extractGuards(
     activated,
     'beforeRouteEnter',
@@ -310,14 +335,14 @@ function extractEnterGuards (
   )
 }
 
-function bindEnterGuard (
+function bindEnterGuard(
   guard: NavigationGuard,
   match: RouteRecord,
   key: string,
-  cbs: Array<Function>,
+  cbs: Array < Function > ,
   isValid: () => boolean
 ): NavigationGuard {
-  return function routeEnterGuard (to, from, next) {
+  return function routeEnterGuard(to, from, next) {
     return guard(to, from, cb => {
       if (typeof cb === 'function') {
         cbs.push(() => {
@@ -334,7 +359,7 @@ function bindEnterGuard (
   }
 }
 
-function poll (
+function poll(
   cb: any, // somehow flow cannot infer this is a function
   instances: Object,
   key: string,
