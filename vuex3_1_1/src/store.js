@@ -174,10 +174,18 @@ export class Store {
     })
   }
 
+  /**
+   * subscribe mutations
+   * @param {} fn 
+   */
   subscribe(fn) {
     return genericSubscribe(fn, this._subscribers)
   }
 
+  /**
+   * subscibeActions
+   * @param {*} fn 
+   */
   subscribeAction(fn) {
     const subs = typeof fn === 'function' ? {
       before: fn
@@ -420,8 +428,7 @@ function makeLocalContext(store, namespace, path) {
   Object.defineProperties(local, {
     getters: {
       get: noNamespace ?
-        () => store.getters :
-        () => makeLocalGetters(store, namespace)
+        () => store.getters : () => makeLocalGetters(store, namespace)
     },
     state: {
       get: () => getNestedState(store.state, path)
