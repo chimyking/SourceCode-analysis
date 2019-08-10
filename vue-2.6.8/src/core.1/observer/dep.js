@@ -15,9 +15,9 @@ let uid = 0
  * 是一个可观察的，可有多个指令订阅
  */
 export default class Dep {
-  static target: ? Watcher;
+  static target: ?Watcher;
   id: number;
-  subs: Array < Watcher > ;
+  subs: Array<Watcher>;
 
   constructor() {
     this.id = uid++
@@ -59,7 +59,7 @@ export default class Dep {
 Dep.target = null
 const targetStack = []
 
-export function pushTarget(target: ? Watcher) {
+export function pushTarget(target: ?Watcher) {
   targetStack.push(target)
   Dep.target = target
 }
